@@ -1,6 +1,6 @@
 {
   "name": "dongtube-apis",
-  "version": "5.2.0",
+  "version": "5.1.1",
   "description": "Simple and easy to use API documentation with anime/waifu, neko, quotes, and downloader endpoints",
   "type": "module",
   "main": "index.js",
