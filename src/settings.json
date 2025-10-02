@@ -1,5 +1,5 @@
 {
-  "name": "DongTube Api'S",
+  "name": "Dongtube Api'S",
   "version": "v5.1.1",
   "description": "Simple and easy to use API documentation.",
   "maintenance": {
@@ -11,7 +11,7 @@
     "status": "Online"
   },
   "apiSettings": {
-    "creator": "DongTube",
+    "creator": "Hanzy",
     "requireApikey": false,
     "apikey": {
       "demo": {
@@ -35,6 +35,118 @@
           "status": "error",
           "params": {
             "text": "Text message for the AI to respond to"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Random Images",
+      "items": [
+        {
+          "name": "Blue Archive",
+          "desc": "Get random high-quality Blue Archive character images",
+          "path": "/random/ba",
+          "status": "ready"
+        },
+        {
+          "name": "Random Waifu",
+          "desc": "Get random waifu images from waifu.pics (supports both GET and POST methods)",
+          "path": "/api/r/waifu",
+          "status": "ready"
+        },
+        {
+          "name": "Random Cat",
+          "desc": "Get random cat images from external API (supports both GET and POST methods)",
+          "path": "/api/r/cats",
+          "status": "ready"
+        },
+        {
+          "name": "Random Anime Neko",
+          "desc": "Get random anime neko images from waifu.pics (supports both GET and POST methods)",
+          "path": "/api/r/neko",
+          "status": "ready"
+        },
+        {
+          "name": "Anime Quotes",
+          "desc": "Get random anime quotes with character and anime information (supports both GET and POST methods)",
+          "path": "/api/r/quotesanime",
+          "status": "ready"
+        }
+      ]
+    },
+    {
+      "name": "Image Makers",
+      "items": [
+        {
+          "name": "BRAT Generator",
+          "desc": "Generate BRAT-style text images with customizable colors and backgrounds",
+          "path": "/maker/brat?text=Hello World",
+          "status": "ready",
+          "params": {
+            "text": "Text to be inserted into the BRAT image (required)"
+          }
+        },
+        {
+          "name": "BRAT Video Generator",
+          "desc": "Generate animated BRAT-style text videos with customizable colors and backgrounds",
+          "path": "/maker/bratvid?text=Hello World",
+          "status": "ready",
+          "params": {
+            "text": "Text to be inserted into the BRAT video (required)"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Tools",
+      "items": [
+        {
+          "name": "Image Upscaler",
+          "desc": "Upscale/enhance images using PicsArt AI enhancement service. Supports both URL input (GET) and file upload (POST) methods.",
+          "path": "/api/tools/upscale",
+          "status": "ready",
+          "params": {
+            "url": "Image URL to upscale (for GET method)",
+            "scale": "Upscale factor (1-20, default: 4)"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Downloader",
+      "items": [
+        {
+          "name": "TikTok Downloader",
+          "desc": "Download TikTok videos and slideshows without watermark. Supports both GET (query parameter) and POST (JSON body) methods.",
+          "path": "/api/d/tiktok",
+          "status": "ready",
+          "params": {
+            "url": "TikTok video URL (required)"
+          }
+        },
+        {
+          "name": "SaveFrom Downloader",
+          "desc": "All-in-One downloader for media from YouTube, Instagram, Facebook, Twitter, TikTok, and more. Supports video, audio, and image downloads with filtering by media type.",
+          "path": "/api/d/savefrom",
+          "status": "ready",
+          "params": {
+            "url": "Media URL from supported platforms (required)",
+            "type": "Filter by media type: video, audio, or image (optional)"
+          }
+        },
+        {
+          "name": "Pinterest Downloader",
+          "desc": "Download images, videos, and GIFs from Pinterest. Supports all Pinterest domains and short URLs with detailed metadata.",
+          "path": "/api/d/pinterest",
+          "status": "ready",
+          "params": {
+            "url": "Pinterest URL (required)"
+          }
+        }
+      ]
+    }
+  ]
+}            "text": "Text message for the AI to respond to"
           }
         }
       ]
