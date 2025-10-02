@@ -1,6 +1,6 @@
 {
   "name": "dongtube-apis",
-  "version": "5.1.1",
+  "version": "5.2.0",
   "description": "Simple and easy to use API documentation with anime/waifu, neko, quotes, and downloader endpoints",
   "type": "module",
   "main": "index.js",
@@ -36,7 +36,6 @@
     "@sparticuz/chromium": "^119.0.2"
   },
   "engines": {
-  "node": ">=22.0.0"
-}
+    "node": ">=22.0.0"
   }
 }
