@@ -39,7 +39,10 @@ app.use((req, res, next) => {
     const isApiEndpoint = req.path.startsWith('/api/') || 
                          req.path.startsWith('/ai/') || 
                          req.path.startsWith('/random/') || 
-                         req.path.startsWith('/maker/')
+                         req.path.startsWith('/maker/') ||
+                         req.path.startsWith('/tools/') ||
+                         req.path.startsWith('/downloader/') ||
+                         req.path.startsWith('/search/') 
     
     if (isApiEndpoint && settings.apiSettings && settings.apiSettings.requireApikey === false) {
       return next()
