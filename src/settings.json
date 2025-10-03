@@ -66,7 +66,7 @@
           "path": "/api/r/waifu",
           "status": "ready"
         },
-        {
+       {
           "name": "Anime Quotes",
           "desc": "Fetch random quotes from anime characters",
           "path": "/api/r/quotesanime",
@@ -139,102 +139,7 @@
           "path": "/tools/upscale?url=",
           "status": "ready",
           "params": {
-            "url": "Image URL to upscale (optional if uploading file)",
-            "scale": "Optional: upscale factor 1-20"
-          }
-        }
-      ]
-    }
-  ]
-}
-            "text": "Text to be inserted into the BRAT image (required)"
-          }
-        },
-        {
-          "name": "BRAT Video Generator",
-          "desc": "Generate animated BRAT-style text videos with customizable colors and backgrounds",
-          "path": "/maker/bratvid?text=Hello World",
-          "status": "ready",
-          "params": {
-            "text": "Text to be inserted into the BRAT video (required)"
-          }
-        }
-      ]
-    },
-    {
-      "name": "Downloaders",
-      "items": [
-        {
-          "name": "TikTok Downloader",
-          "desc": "Scrape TikTok video/photo/slideshow with HD links",
-          "path": "/api/d/tiktok?url=",
-          "status": "ready",
-          "params": {
-            "url": "TikTok video URL"
-          }
-        },
-        {
-          "name": "Pinterest Downloader",
-          "desc": "Download images, videos, or GIFs from Pinterest pins",
-          "path": "/downloader/pinterest?url=",
-          "status": "ready",
-          "params": {
-            "url": "Pinterest pin URL"
-          }
-        },
-        {
-          "name": "SaveFrom Downloader",
-          "desc": "Scrape video, audio, or image links from various platforms via SaveFrom.net",
-          "path": "/api/d/savefrom?url=",
-          "status": "ready",
-          "params": {
-            "url": "Media URL to download",
-            "type": "Optional: 'video', 'audio', or 'image'"
-          }
-        }
-      ]
-    },
-    {
-      "name": "Tools",
-      "items": [
-        {
-          "name": "Image Upscaler",
-          "desc": "Upscale images via PicsArt AI, supports URL or file upload",
-          "path": "/tools/upscale?url=",
-          "status": "ready",
-          "params": {
-            "url": "Image URL to upscale (optional if uploading file)",
-            "scale": "Optional: upscale factor 1-20"
-          }
-        }
-      ]
-    }
-  ]
-}
-        },
-        {
-          "name": "SaveFrom Downloader",
-          "desc": "Scrape video, audio, or image links from various platforms via SaveFrom.net",
-          "path": "/api/d/savefrom?url=",
-          "status": "ready",
-          "params": {
-            "url": "Media URL to download",
-            "type": "Optional: 'video', 'audio', or 'image'"
-          }
-        }
-      ]
-    },
-    {
-      "name": "Tools",
-      "items": [
-        {
-          "name": "Image Upscaler",
-          "desc": "Upscale images via PicsArt AI, supports URL or file upload",
-          "path": "/tools/upscale?url=",
-          "status": "ready",
-          "params": {
-            "url": "Image URL to upscale (optional if uploading file)",
-            "scale": "Optional: upscale factor 1-20"
+            "url": "Image URL to upscale (optional if uploading file)"
           }
         }
       ]
