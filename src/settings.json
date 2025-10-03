@@ -14,15 +14,13 @@
     "creator": "dongtube",
     "requireApikey": true,
     "apikey": {
-      "demo": {
+      "dongtube": {
         "rateLimit": "5000/day",
-        "enabled": true,
-        "key": "dongtube"
+        "enabled": true
       },
-      "admin": {
+      "hanzyy001": {
         "rateLimit": "unlimited",
-        "enabled": true,
-        "key": "hanzyy001"
+        "enabled": true
       }
     }
   },
