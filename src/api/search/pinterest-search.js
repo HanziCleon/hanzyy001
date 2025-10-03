@@ -7,18 +7,36 @@ class PinterestSearch {
   constructor() {
     this.baseUrl = "https://id.pinterest.com"
     this.headers = {
-      "User-Agent":
-        "Mozilla/5.0 (Linux; Android 10; Mobile; rv:117.0) Gecko/117.0 Firefox/117.0",
+      "User-Agent": "Mozilla/5.0 (Linux; Android 10; Mobile; rv:109.0) Gecko/117.0 Firefox/117.0",
     }
+    this.client = axios.create({
+      baseURL: this.baseUrl,
+      headers: this.headers,
+    })
+    this.cookies = ""
+    this.client.interceptors.response.use(
+      (response) => {
+        const setCookieHeaders = response.headers["set-cookie"]
+        if (setCookieHeaders) {
+          const newCookies = setCookieHeaders.map((cookieString) => {
+            const cp = cookieString.split(";")
+            return cp[0].trim()
+          })
+          this.cookies = newCookies.join("; ")
+          this.client.defaults.headers.cookie = this.cookies
+        }
+        return response
+      },
+      (error) => Promise.reject(error),
+    )
   }
 
-  async getCookies() {
+  async initCookies() {
     try {
-      const resp = await axios.get(this.baseUrl, { headers: this.headers })
-      const setCookieHeader = resp.headers["set-cookie"] || []
-      return setCookieHeader.map((c) => c.split(";")[0]).join("; ")
-    } catch (e) {
-      return ""
+      await this.client.get("/")
+      return true
+    } catch (error) {
+      return false
     }
   }
 
@@ -27,53 +45,48 @@ class PinterestSearch {
       return {
         status: false,
         code: 400,
-        result: { message: "Query parameter is required" },
+        result: { message: "Query parameter is required." },
       }
     }
 
     try {
-      const cookie = await this.getCookies()
-      const { data } = await axios.get(
-        `${this.baseUrl}/search/pins/?autologin=true&q=${encodeURIComponent(query)}`,
-        {
-          headers: { ...this.headers, Cookie: cookie },
+      if (!this.cookies) {
+        const success = await this.initCookies()
+        if (!success) {
+          return {
+            status: false,
+            code: 400,
+            result: { message: "Failed to retrieve cookies." },
+          }
         }
-      )
+      }
 
+      const { data } = await this.client.get(`/search/pins/?autologin=true&q=${encodeURIComponent(query)}`)
       const $ = cheerio.load(data)
       const result = []
 
-      $("div > a").each((_, el) => {
-        const link = $(el).find("img").attr("src")
+      $("div > a").get().map((b) => {
+        const link = $(b).find("img").attr("src")
         if (link) result.push(link.replace(/236/g, "736"))
       })
 
       if (!result.length) {
-        return {
-          status: false,
-          code: 404,
-          result: { message: "No images found." },
-        }
+        return { status: false, code: 404, result: { message: "No images found." } }
       }
-
-      // ambil 5 gambar acak
-      const shuffled = result.sort(() => 0.5 - Math.random())
-      const images = shuffled.slice(0, 5)
 
       return {
         status: true,
         code: 200,
         result: {
           query,
-          count: images.length,
-          images,
+          images: result, // semua hasil
         },
       }
     } catch (error) {
       return {
         status: false,
         code: error.response?.status || 500,
-        result: { message: error.message || "Internal Server Error" },
+        result: { message: "Server error, please try again later." },
       }
     }
   }
@@ -84,27 +97,35 @@ const pinterestSearch = new PinterestSearch()
 export default (app) => {
   // GET endpoint
   app.get("/search/pinterest", createApiKeyMiddleware(), async (req, res) => {
-    const { q } = req.query
-    if (!q) return res.status(400).json({ status: false, error: "Missing query param `q`" })
+    try {
+      const { q } = req.query
+      if (!q) return res.status(400).json({ status: false, error: "Query parameter is required" })
 
-    const result = await pinterestSearch.search({ query: q.trim() })
-    if (!result.status) {
-      return res.status(result.code).json({ status: false, error: result.result.message })
+      const result = await pinterestSearch.search({ query: q.trim() })
+      if (!result.status) {
+        return res.status(result.code).json({ status: false, error: result.result.message })
+      }
+
+      res.status(200).json({ status: true, data: result.result, timestamp: new Date().toISOString() })
+    } catch (error) {
+      res.status(500).json({ status: false, error: error.message || "Internal Server Error" })
     }
-
-    res.status(200).json({ status: true, data: result.result, timestamp: new Date().toISOString() })
   })
 
   // POST endpoint
   app.post("/search/pinterest", createApiKeyMiddleware(), async (req, res) => {
-    const { q } = req.body
-    if (!q) return res.status(400).json({ status: false, error: "Missing query param `q`" })
+    try {
+      const { q } = req.body
+      if (!q) return res.status(400).json({ status: false, error: "Query parameter is required" })
 
-    const result = await pinterestSearch.search({ query: q.trim() })
-    if (!result.status) {
-      return res.status(result.code).json({ status: false, error: result.result.message })
+      const result = await pinterestSearch.search({ query: q.trim() })
+      if (!result.status) {
+        return res.status(result.code).json({ status: false, error: result.result.message })
+      }
+
+      res.status(200).json({ status: true, data: result.result, timestamp: new Date().toISOString() })
+    } catch (error) {
+      res.status(500).json({ status: false, error: error.message || "Internal Server Error" })
     }
-
-    res.status(200).json({ status: true, data: result.result, timestamp: new Date().toISOString() })
   })
-}
+      }
