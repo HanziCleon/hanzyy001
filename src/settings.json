@@ -35,8 +35,9 @@
           "status": "ready",
           "params": {
             "q": "Search query (e.g. song title, channel, keyword)"
-            },
-            {
+          }
+        },
+        {
           "name": "Pinterest Search",
           "desc": "Search Pinterest pins and return random image results",
           "path": "/search/pinterest?q=",
@@ -89,23 +90,23 @@
           }
         },
         {
-  "name": "Xiaohongshu Downloader",
-  "desc": "Download videos or images from Xiaohongshu (RED) posts",
-  "path": "/downloader/xiaohongshu?url=",
-  "status": "ready",
-  "params": {
-    "url": "Xiaohongshu post URL"
-  }
-},
-{
-  "name": "Spotify Downloader",
-  "desc": "Download music from Spotify (via external service)",
-  "path": "/downloader/spotify?url=",
-  "status": "ready",
-  "params": {
-    "url": "Spotify track URL"
-  }
-},
+          "name": "Xiaohongshu Downloader",
+          "desc": "Download videos or images from Xiaohongshu (RED) posts",
+          "path": "/downloader/xiaohongshu?url=",
+          "status": "ready",
+          "params": {
+            "url": "Xiaohongshu post URL"
+          }
+        },
+        {
+          "name": "Spotify Downloader",
+          "desc": "Download music from Spotify (via external service)",
+          "path": "/downloader/spotify?url=",
+          "status": "ready",
+          "params": {
+            "url": "Spotify track URL"
+          }
+        },
         {
           "name": "TikTok Downloader",
           "desc": "Download videos (with/without watermark) from TikTok",
