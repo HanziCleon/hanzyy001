@@ -1,6 +1,6 @@
 {
   "name": "Dongtube Api'S",
-  "version": "v5.2.0",
+  "version": "v5.1.1",
   "description": "Simple and easy to use API documentation.",
   "maintenance": {
     "enabled": false
@@ -47,35 +47,6 @@
           "desc": "Get random high-quality Blue Archive character images",
           "path": "/random/ba",
           "status": "ready"
-        },
-        {
-          "name": "Random Cat",
-          "desc": "Get a random cat image",
-          "path": "/api/r/cats",
-          "status": "ready"
-        },
-        {
-          "name": "Random Waifu",
-          "desc": "Get a random waifu image",
-          "path": "/api/r/waifu",
-          "status": "ready"
-        },
-        {
-          "name": "Random Neko",
-          "desc": "Get a random anime neko image",
-          "path": "/api/r/neko",
-          "status": "ready"
-        }
-      ]
-    },
-    {
-      "name": "Quotes",
-      "items": [
-        {
-          "name": "Anime Quotes",
-          "desc": "Get random anime quotes with character and episode info",
-          "path": "/api/r/quotesanime",
-          "status": "ready"
         }
       ]
     },
@@ -108,35 +79,12 @@
         {
           "name": "TikTok Downloader",
           "desc": "Scrape TikTok video/photo/slideshow with HD links",
-          "path": "/api/d/tiktok?url=",
+          "path": "/api/d/tiktok?url=https://tiktok.com/xxx",
           "status": "ready",
           "params": {
             "url": "TikTok video URL"
           }
         }
-      ]
-    }
-  ]
-}      ]
-    },
-    {
-      "name": "Image Tools",
-      "items": [
-        { "name": "Upscale Image", "desc": "Upscale images using PicsArt AI", "path": "/tools/upscale", "status": "ready" }
-      ]
-    },
-    {
-      "name": "Downloaders",
-      "items": [
-        { "name": "SaveFrom Downloader", "desc": "Download video/audio/images using SaveFrom.net", "path": "/api/d/savefrom", "status": "ready" },
-        { "name": "Pinterest Downloader", "desc": "Download images/videos from Pinterest", "path": "/downloader/pinterest", "status": "ready" }
-      ]
-    },
-    {
-      "name": "Image Makers",
-      "items": [
-        { "name": "BRAT Generator", "desc": "Generate BRAT-style text images", "path": "/maker/brat?text=Hello World", "status": "ready" },
-        { "name": "BRAT Video Generator", "desc": "Generate BRAT-style text videos", "path": "/maker/bratvid?text=Hello World", "status": "ready" }
       ]
     }
   ]
