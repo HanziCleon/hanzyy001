@@ -23,7 +23,10 @@
     "spotify",
     "tiktok",
     "removebg",
-    "remini"
+    "remini",
+    "appmaker",
+    "pinterest",
+    "youtube"
   ],
   "author": "Dongtube",
   "license": "MIT",
@@ -37,7 +40,11 @@
     "form-data": "^4.0.0",
     "puppeteer-extra": "^3.3.6",
     "puppeteer-extra-plugin-stealth": "^2.11.2",
-    "@sparticuz/chromium": "^119.0.2"
+    "@sparticuz/chromium": "^119.0.2",
+    "yt-search": "^2.12.1",
+    "multer": "^1.4.5-lts.1",
+    "body-parser": "^1.20.2",
+    "morgan": "^1.10.0"
   },
   "engines": {
     "node": ">=22.0.0"
