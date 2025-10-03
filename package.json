@@ -51,3 +51,12 @@
   "engines": {
     "node": ">=22.0.0"
   }
+}
+    "form-data": "^4.0.0",
+    "puppeteer-extra": "^3.3.6",
+    "puppeteer-extra-plugin-stealth": "^2.11.2",
+    "@sparticuz/chromium": "^119.0.2"
+  },
+  "engines": {
+    "node": ">=22.0.0"
+  }
