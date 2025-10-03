@@ -102,7 +102,7 @@
           "name": "Spotify Downloader",
           "desc": "Download music from Spotify (via external service)",
           "path": "/downloader/spotify?url=",
-          "status": "ready",
+          "status": "error",
           "params": {
             "url": "Spotify track URL"
           }
