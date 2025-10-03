@@ -1,6 +1,6 @@
 {
   "name": "Dongtube Api'S",
-  "version": "v5.1.3",
+  "version": "v5.3.0",
   "description": "Simple and easy to use API documentation.",
   "maintenance": {
     "enabled": false
@@ -12,7 +12,7 @@
   },
   "apiSettings": {
     "creator": "dongtube",
-    "requireApikey": false,
+    "requireApikey": true,
     "apikey": {
       "demo": {
         "rateLimit": "5000/day",
@@ -26,32 +26,12 @@
   },
   "categories": [
     {
-      "name": "Artificial Intelligence",
-      "items": [
-        {
-          "name": "LuminAI",
-          "desc": "Advanced AI assistant powered by LuminAI for intelligent conversations",
-          "path": "/ai/luminai?text=",
-          "status": "error",
-          "params": {
-            "text": "Text message for the AI to respond to"
-          }
-        }
-      ]
-    },
-    {
       "name": "Random Images",
       "items": [
         {
           "name": "Blue Archive",
           "desc": "Get random high-quality Blue Archive character images",
           "path": "/random/ba",
-          "status": "ready"
-        },
-        {
-          "name": "Random Cat",
-          "desc": "Fetch random cat images",
-          "path": "/api/r/cats",
           "status": "ready"
         },
         {
@@ -65,8 +45,8 @@
           "desc": "Fetch random anime Waifu images",
           "path": "/api/r/waifu",
           "status": "ready"
-        },
-       {
+    },
+    {
           "name": "Anime Quotes",
           "desc": "Fetch random quotes from anime characters",
           "path": "/api/r/quotesanime",
@@ -75,40 +55,8 @@
       ]
     },
     {
-      "name": "Image Makers",
-      "items": [
-        {
-          "name": "BRAT Generator",
-          "desc": "Generate BRAT-style text images with customizable colors and backgrounds",
-          "path": "/maker/brat?text=Hello World",
-          "status": "ready",
-          "params": {
-            "text": "Text to be inserted into the BRAT image (required)"
-          }
-        },
-        {
-          "name": "BRAT Video Generator",
-          "desc": "Generate animated BRAT-style text videos with customizable colors and backgrounds",
-          "path": "/maker/bratvid?text=Hello World",
-          "status": "ready",
-          "params": {
-            "text": "Text to be inserted into the BRAT video (required)"
-          }
-        }
-      ]
-    },
-    {
       "name": "Downloaders",
       "items": [
-        {
-          "name": "TikTok Downloader",
-          "desc": "Scrape TikTok video/photo/slideshow with HD links",
-          "path": "/api/d/tiktok?url=",
-          "status": "ready",
-          "params": {
-            "url": "TikTok video URL"
-          }
-        },
         {
           "name": "Pinterest Downloader",
           "desc": "Download images, videos, or GIFs from Pinterest pins",
@@ -119,13 +67,26 @@
           }
         },
         {
-          "name": "SaveFrom Downloader",
-          "desc": "Scrape video, audio, or image links from various platforms via SaveFrom.net",
-          "path": "/api/d/savefrom?url=",
+          "name": "TikTok Downloader",
+          "desc": "Download videos (with/without watermark) from TikTok",
+          "path": "/api/d/tiktok?url=",
           "status": "ready",
           "params": {
-            "url": "Media URL to download",
-            "type": "Optional: 'video', 'audio', or 'image'"
+            "url": "TikTok video URL"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Music Tools",
+      "items": [
+        {
+          "name": "Spotify Info",
+          "desc": "Get track/playlist info from Spotify via Spotisaver",
+          "path": "/api/d/spotify?url=",
+          "status": "ready",
+          "params": {
+            "url": "Spotify track or playlist URL"
           }
         }
       ]
@@ -134,12 +95,21 @@
       "name": "Tools",
       "items": [
         {
-          "name": "Image Upscaler",
-          "desc": "Upscale images via PicsArt AI, supports URL or file upload",
-          "path": "/tools/upscale?url=",
+          "name": "Remove Background",
+          "desc": "Remove image background using external service",
+          "path": "/api/tools/removebg?url=",
           "status": "ready",
           "params": {
-            "url": "Image URL to upscale (optional if uploading file)"
+            "url": "Image URL to remove background (or upload file via POST)"
+          }
+        },
+        {
+          "name": "Remini Enhancer",
+          "desc": "Enhance / upscale images using Remini AI",
+          "path": "/api/tools/remini",
+          "status": "ready",
+          "params": {
+            "file": "Upload image file (POST required)"
           }
         }
       ]
