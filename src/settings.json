@@ -1,0 +1,131 @@
+{
+  "name": "Dongtube Api'S",
+  "version": "v5.3.0",
+  "description": "Simple and easy to use API documentation.",
+  "maintenance": {
+    "enabled": false
+  },
+  "bannerImage": "/src/images/banner.jpg",
+  "previewImage": "/src/images/preview.png",
+  "header": {
+    "status": "Online"
+  },
+  "apiSettings": {
+    "creator": "dongtube",
+    "requireApikey": true,
+    "apikey": {
+      "dongtube": {
+        "rateLimit": "5000/day",
+        "enabled": true
+      },
+      "hanzyy001": {
+        "rateLimit": "unlimited",
+        "enabled": true
+      }
+    }
+  },
+  "categories": [
+    {
+      "name": "Search Tools",
+      "items": [
+        {
+          "name": "YouTube Search",
+          "desc": "Search videos on YouTube and return metadata",
+          "path": "/search/youtube?q=",
+          "status": "ready",
+          "params": {
+            "q": "Search query (e.g. song title, channel, keyword)"
+            }
+        }
+      ]
+    },
+    {
+      "name": "Random Images",
+      "items": [
+        {
+          "name": "Blue Archive",
+          "desc": "Get random high-quality Blue Archive character images",
+          "path": "/random/ba",
+          "status": "ready"
+        },
+        {
+          "name": "Random Neko",
+          "desc": "Fetch random anime Neko images",
+          "path": "/api/r/neko",
+          "status": "ready"
+        },
+        {
+          "name": "Random Waifu",
+          "desc": "Fetch random anime Waifu images",
+          "path": "/api/r/waifu",
+          "status": "ready"
+        },
+        {
+          "name": "Anime Quotes",
+          "desc": "Fetch random quotes from anime characters",
+          "path": "/api/r/quotesanime",
+          "status": "ready"
+        }
+      ]
+    },
+    {
+      "name": "Downloaders",
+      "items": [
+        {
+          "name": "Pinterest Downloader",
+          "desc": "Download images, videos, or GIFs from Pinterest pins",
+          "path": "/downloader/pinterest?url=",
+          "status": "ready",
+          "params": {
+            "url": "Pinterest pin URL"
+          }
+        },
+        {
+  "name": "Threads Downloader",
+  "desc": "Download videos/images from Threads",
+  "path": "/downloader/threads?url=",
+  "status": "ready",
+  "params": {
+    "url": "Threads post URL"
+  }
+},
+{
+  "name": "Spotify Downloader",
+  "desc": "Download music from Spotify (via external service)",
+  "path": "/downloader/spotify?url=",
+  "status": "ready",
+  "params": {
+    "url": "Spotify track URL"
+  }
+},
+        {
+          "name": "TikTok Downloader",
+          "desc": "Download videos (with/without watermark) from TikTok",
+          "path": "/api/d/tiktok?url=",
+          "status": "ready",
+          "params": {
+            "url": "TikTok video URL"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Tools",
+      "items": [
+        {
+          "name": "Appmaker",
+          "desc": "Convert a website into APK (via Appmaker service)",
+          "path": "/api/tools/appmaker",
+          "status": "error",
+          "params": {
+            "url": "Website URL (required)",
+            "email": "Email for build result (required)",
+            "appName": "App name (required)",
+            "icon": "URL to app icon image (required)",
+            "splash": "URL to splash screen image (required)"
+          }
+        }
+      ]
+    }
+  ]
+}
