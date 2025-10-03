@@ -14,15 +14,18 @@
     "creator": "dongtube",
     "requireApikey": true,
     "apikey": {
-      "demo": {
-        "rateLimit": "5000/day",
-        "enabled": true
-      },
-      "admin": {
-        "rateLimit": "unlimited",
-        "enabled": true
-      }
-    }
+  "demo": {
+    "rateLimit": "5000/day",
+    "enabled": true,
+    "key": "dongtube"
+  },
+  "admin": {
+    "rateLimit": "unlimited",
+    "enabled": true,
+    "key": "hanzyy001"
+  }
+}
+
   },
   "categories": [
     {
@@ -34,6 +37,88 @@
           "path": "/random/ba",
           "status": "ready"
         },
+        {
+          "name": "Random Neko",
+          "desc": "Fetch random anime Neko images",
+          "path": "/api/r/neko",
+          "status": "ready"
+        },
+        {
+          "name": "Random Waifu",
+          "desc": "Fetch random anime Waifu images",
+          "path": "/api/r/waifu",
+          "status": "ready"
+    },
+    {
+          "name": "Anime Quotes",
+          "desc": "Fetch random quotes from anime characters",
+          "path": "/api/r/quotesanime",
+          "status": "ready"
+        }
+      ]
+    },
+    {
+      "name": "Downloaders",
+      "items": [
+        {
+          "name": "Pinterest Downloader",
+          "desc": "Download images, videos, or GIFs from Pinterest pins",
+          "path": "/downloader/pinterest?url=",
+          "status": "ready",
+          "params": {
+            "url": "Pinterest pin URL"
+          }
+        },
+        {
+          "name": "TikTok Downloader",
+          "desc": "Download videos (with/without watermark) from TikTok",
+          "path": "/api/d/tiktok?url=",
+          "status": "ready",
+          "params": {
+            "url": "TikTok video URL"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Music Tools",
+      "items": [
+        {
+          "name": "Spotify Info",
+          "desc": "Get track/playlist info from Spotify via Spotisaver",
+          "path": "/api/d/spotify?url=",
+          "status": "ready",
+          "params": {
+            "url": "Spotify track or playlist URL"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Tools",
+      "items": [
+        {
+          "name": "Remove Background",
+          "desc": "Remove image background using external service",
+          "path": "/api/tools/removebg?url=",
+          "status": "ready",
+          "params": {
+            "url": "Image URL to remove background (or upload file via POST)"
+          }
+        },
+        {
+          "name": "Remini Enhancer",
+          "desc": "Enhance / upscale images using Remini AI",
+          "path": "/api/tools/remini",
+          "status": "ready",
+          "params": {
+            "file": "Upload image file (POST required)"
+          }
+        }
+      ]
+    }
+  ]
+}
         {
           "name": "Random Neko",
           "desc": "Fetch random anime Neko images",
