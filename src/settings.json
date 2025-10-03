@@ -1,7 +1,7 @@
 {
   "name": "Dongtube Api'S",
-  "version": "5.2.0",
-  "description": "Simple and easy to use API documentation with AI, random images, and downloader endpoints.",
+  "version": "5.2.1",
+  "description": "Safe API documentation with AI, random images, image tools, and downloaders.",
   "maintenance": {
     "enabled": false
   },
@@ -12,17 +12,7 @@
   },
   "apiSettings": {
     "creator": "DongTube",
-    "requireApikey": false,
-    "apikey": {
-      "demo": {
-        "rateLimit": "5000/day",
-        "enabled": true
-      },
-      "admin": {
-        "rateLimit": "unlimited",
-        "enabled": true
-      }
-    }
+    "requireApikey": false
   },
   "categories": [
     {
@@ -30,283 +20,40 @@
       "items": [
         {
           "name": "LuminAI",
-          "desc": "Advanced AI assistant powered by LuminAI for intelligent conversations",
+          "desc": "Advanced AI assistant powered by LuminAI",
           "path": "/ai/luminai?text=",
-          "status": "ready",
-          "params": {
-            "text": "Text message for the AI to respond to"
-          }
+          "status": "ready"
         }
       ]
     },
     {
       "name": "Random Images",
       "items": [
-        {
-          "name": "Blue Archive",
-          "desc": "Get random high-quality Blue Archive character images",
-          "path": "/random/ba",
-          "status": "ready"
-        },
-        {
-          "name": "Random Cat",
-          "desc": "Get a random cute cat image",
-          "path": "/api/r/cats",
-          "status": "ready"
-        },
-        {
-          "name": "Random Waifu",
-          "desc": "Get a random waifu image",
-          "path": "/api/r/waifu",
-          "status": "ready"
-        },
-        {
-          "name": "Random Neko",
-          "desc": "Get a random neko (anime catgirl) image",
-          "path": "/api/r/neko",
-          "status": "ready"
-        },
-        {
-          "name": "Anime Quotes",
-          "desc": "Get random inspirational anime quotes with character info",
-          "path": "/api/r/quotesanime",
-          "status": "ready"
-        }
+        { "name": "Blue Archive", "desc": "Get random Blue Archive images", "path": "/random/ba", "status": "ready" },
+        { "name": "Random Cat", "desc": "Get a random cute cat image", "path": "/api/r/cats", "status": "ready" },
+        { "name": "Random Waifu", "desc": "Get a random waifu image", "path": "/api/r/waifu", "status": "ready" },
+        { "name": "Random Neko", "desc": "Get a random neko image", "path": "/api/r/neko", "status": "ready" },
+        { "name": "Anime Quotes", "desc": "Get random anime quotes", "path": "/api/r/quotesanime", "status": "ready" }
       ]
     },
     {
       "name": "Image Tools",
       "items": [
-        {
-          "name": "Upscale Image",
-          "desc": "Upscale an image using PicsArt AI upscaler",
-          "path": "/tools/upscale",
-          "status": "ready",
-          "params": {
-            "url": "URL of the image (optional if uploading file)",
-            "scale": "Target upscale factor (default 4)"
-          }
-        }
+        { "name": "Upscale Image", "desc": "Upscale images using PicsArt AI", "path": "/tools/upscale", "status": "ready" }
       ]
     },
     {
       "name": "Downloaders",
       "items": [
-        {
-          "name": "SaveFrom Downloader",
-          "desc": "Download videos/audio/images using SaveFrom.net",
-          "path": "/api/d/savefrom",
-          "status": "ready",
-          "params": {
-            "url": "URL of the media",
-            "type": "Optional: video, audio, image"
-          }
-        },
-        {
-          "name": "Pinterest Downloader",
-          "desc": "Download images/videos from Pinterest pins",
-          "path": "/downloader/pinterest",
-          "status": "ready",
-          "params": {
-            "url": "Pinterest pin URL"
-          }
-        }
+        { "name": "SaveFrom Downloader", "desc": "Download video/audio/images using SaveFrom.net", "path": "/api/d/savefrom", "status": "ready" },
+        { "name": "Pinterest Downloader", "desc": "Download images/videos from Pinterest", "path": "/downloader/pinterest", "status": "ready" }
       ]
     },
     {
       "name": "Image Makers",
       "items": [
-        {
-          "name": "BRAT Generator",
-          "desc": "Generate BRAT-style text images with customizable colors and backgrounds",
-          "path": "/maker/brat?text=Hello World",
-          "status": "ready",
-          "params": {
-            "text": "Text to be inserted into the BRAT image"
-          }
-        },
-        {
-          "name": "BRAT Video Generator",
-          "desc": "Generate animated BRAT-style text videos with customizable colors and backgrounds",
-          "path": "/maker/bratvid?text=Hello World",
-          "status": "ready",
-          "params": {
-            "text": "Text to be inserted into the BRAT video"
-          }
-        }
-      ]
-    }
-  ]
-}            "text": "Text message for the AI to respond to (required)"
-          }
-        }
-      ]
-    },
-    {
-      "name": "Random Images",
-      "items": [
-        {
-          "name": "Blue Archive",
-          "desc": "Get random high-quality Blue Archive character images",
-          "path": "/random/ba",
-          "status": "ready"
-        },
-        {
-          "name": "Random Cat",
-          "desc": "Get a random cute cat image",
-          "path": "/api/r/cats",
-          "status": "ready"
-        },
-        {
-          "name": "Random Waifu",
-          "desc": "Get a random waifu image",
-          "path": "/api/r/waifu",
-          "status": "ready"
-        },
-        {
-          "name": "Random Neko",
-          "desc": "Get a random neko (anime catgirl) image",
-          "path": "/api/r/neko",
-          "status": "ready"
-        },
-        {
-          "name": "Anime Quotes",
-          "desc": "Get random inspirational anime quotes with character info",
-          "path": "/api/r/quotesanime",
-          "status": "ready"
-        }
-      ]
-    },
-    {
-      "name": "Image Makers",
-      "items": [
-        {
-          "name": "BRAT Generator",
-          "desc": "Generate BRAT-style text images with customizable colors and backgrounds",
-          "path": "/maker/brat?text=Hello World",
-          "status": "ready",
-          "params": {
-            "text": "Text to be inserted into the BRAT image (required)"
-          }
-        },
-        {
-          "name": "BRAT Video Generator",
-          "desc": "Generate animated BRAT-style text videos with customizable colors and backgrounds",
-          "path": "/maker/bratvid?text=Hello World",
-          "status": "ready",
-          "params": {
-            "text": "Text to be inserted into the BRAT video (required)"
-          }
-        }
-      ]
-    },
-    {
-      "name": "Image Tools",
-      "items": [
-        {
-          "name": "Upscale Image (PicsArt AI)",
-          "desc": "Enhance or upscale an image using PicsArt AI. Supports URL or file upload.",
-          "path": "/tools/upscale",
-          "status": "ready",
-          "params": {
-            "GET": {
-              "url": "Image URL to upscale (required)",
-              "scale": "Upscale factor (optional, default 4, range 1-20)"
-            },
-            "POST": {
-              "image": "Upload image file (required)",
-              "scale": "Upscale factor (optional, default 4, range 1-20)"
-            }
-          }
-        }
-      ]
-    },
-    {
-      "name": "Downloaders",
-      "items": [
-        {
-          "name": "SaveFrom Downloader",
-          "desc": "Download video, audio, or images from supported sites via SaveFrom.net.",
-          "path": "/api/d/savefrom",
-          "status": "ready",
-          "params": {
-            "url": "URL of the media (required)",
-            "type": "Filter by type: video, audio, image (optional)"
-          }
-        },
-        {
-          "name": "Pinterest Downloader",
-          "desc": "Download media (image, video, gif) from Pinterest pins.",
-          "path": "/downloader/pinterest",
-          "status": "ready",
-          "params": {
-            "url": "Pinterest pin URL (required)"
-          }
-        }
-      ]
-    }
-  ]
-}            "text": "Text message for the AI to respond to (required)"
-          }
-        }
-      ]
-    },
-    {
-      "name": "Random Images",
-      "items": [
-        {
-          "name": "Blue Archive",
-          "desc": "Get random high-quality Blue Archive character images",
-          "path": "/random/ba",
-          "status": "ready"
-        },
-        {
-          "name": "Random Cat",
-          "desc": "Get a random cute cat image",
-          "path": "/api/r/cats",
-          "status": "ready"
-        },
-        {
-          "name": "Random Waifu",
-          "desc": "Get a random waifu image",
-          "path": "/api/r/waifu",
-          "status": "ready"
-        },
-        {
-          "name": "Random Neko",
-          "desc": "Get a random neko (anime catgirl) image",
-          "path": "/api/r/neko",
-          "status": "ready"
-        },
-        {
-          "name": "Anime Quotes",
-          "desc": "Get random inspirational anime quotes with character info",
-          "path": "/api/r/quotesanime",
-          "status": "ready"
-        }
-      ]
-    },
-    {
-      "name": "Image Makers",
-      "items": [
-        {
-          "name": "BRAT Generator",
-          "desc": "Generate BRAT-style text images with customizable colors and backgrounds",
-          "path": "/maker/brat?text=Hello World",
-          "status": "ready",
-          "params": {
-            "text": "Text to be inserted into the BRAT image (required)"
-          }
-        },
-        {
-          "name": "BRAT Video Generator",
-          "desc": "Generate animated BRAT-style text videos with customizable colors and backgrounds",
-          "path": "/maker/bratvid?text=Hello World",
-          "status": "ready",
-          "params": {
-            "text": "Text to be inserted into the BRAT video (required)"
-          }
-        }
+        { "name": "BRAT Generator", "desc": "Generate BRAT-style text images", "path": "/maker/brat?text=Hello World", "status": "ready" },
+        { "name": "BRAT Video Generator", "desc": "Generate BRAT-style text videos", "path": "/maker/bratvid?text=Hello World", "status": "ready" }
       ]
     }
   ]
