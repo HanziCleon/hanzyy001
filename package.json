@@ -1,0 +1,45 @@
+{
+  "name": "dongtube-apis",
+  "version": "5.3.2",
+  "description": "Simple and easy to use API documentation with anime/waifu, neko, quotes, and downloader endpoints",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "node --watch index.js",
+    "test": "echo \"No tests specified\" && exit 0"
+  },
+  "keywords": [
+    "api",
+    "documentation",
+    "rest",
+    "express",
+    "nodejs",
+    "anime",
+    "waifu",
+    "neko",
+    "quotes",
+    "downloader",
+    "tiktok",
+    "threads",
+    "xiaohongshu",
+    "pinterest",
+    "youtube",
+    "remini"
+  ],
+  "author": "Dongtube",
+  "license": "MIT",
+  "dependencies": {
+    "axios": "^1.6.0",
+    "chalk": "^5.3.0",
+    "cheerio": "^1.0.0-rc.12",
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2",
+    "form-data": "^4.0.0",
+    "yt-search": "^2.12.0"
+  },
+  "engines": {
+    "node": ">=22.0.0"
+  }
+}
