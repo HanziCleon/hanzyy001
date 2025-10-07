@@ -33,6 +33,9 @@
   },
   "categories": [
     {
+      "name": "Artificial Intelligence",
+      "items": [
+        {
           "name": "Nsfw Check",
           "desc": "🔞 Check NSFW content from image URL (Detects adult or explicit content)",
           "path": "/ai/nsfw-check?url=",
@@ -117,7 +120,7 @@
       ]
     },
     {
-      "name": "Random",
+      "name": "Random Images",
       "items": [
         {
           "name": "Blue Archive",
@@ -238,7 +241,7 @@
       ]
     },
     {
-      "name": "Makers",
+      "name": "Image Makers",
       "items": [
         {
           "name": "BRAT Generator",
@@ -271,4 +274,4 @@
       "createdAt": "2025-10-05T04:45:58.171Z"
     }
   ]
-}
+        }
