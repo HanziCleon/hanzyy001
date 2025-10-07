@@ -1,0 +1,277 @@
+{
+  "name": "Dongtube Api'S",
+  "version": "v7.1.0",
+  "description": "Simple and easy to use API documentation.",
+  "maintenance": {
+    "enabled": false,
+    "message": ""
+  },
+  "bannerImage": "/src/images/banner.jpg",
+  "previewImage": "/src/images/preview.png",
+  "header": {
+    "status": "Online"
+  },
+  "apiSettings": {
+    "creator": "dongtube",
+    "requireApikey": false,
+    "apikey": {
+      "demo": {
+        "rateLimit": "5000/day",
+        "enabled": true
+      },
+      "admin": {
+        "rateLimit": "unlimited",
+        "enabled": true
+      },
+      "hanzyy001": {
+        "rateLimit": "unlimited",
+        "enabled": true,
+        "category": "premium",
+        "name": "hanzyy001"
+      }
+    }
+  },
+  "categories": [
+    {
+      "name": "Artificial Intelligence",
+      "items": [
+        {
+          "name": "Nsfw Check",
+          "desc": "🔞 Check NSFW content from image URL (Detects adult or explicit content)",
+          "path": "/ai/nsfw-check?url=",
+          "status": "ready",
+          "params": {
+            "url": "URL of the image to analyze"
+          }
+        },
+        {
+          "name": "Copilot Chat",
+          "desc": "Chat with Microsoft Copilot via WebSocket (supports reasoning & smart modes)",
+          "path": "/ai/copilot?message=",
+          "status": "ready",
+          "params": {
+            "message": "Your chat message",
+            "model": "Choose between default, think-deeper, or gpt-5"
+          }
+        },
+        {
+          "name": "Zai Chat",
+          "desc": "Chat with Z.ai LLM (supports GLM models and deep web search)",
+          "path": "/ai/zai?question=",
+          "status": "ready",
+          "params": {
+            "question": "Your question or prompt",
+            "model": "GLM model name (e.g. glm-4.5, z1-rumination)",
+            "system_prompt": "Optional system role prompt",
+            "search": "Boolean — enable deep web search (true/false)"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Search",
+      "items": [
+        {
+          "name": "Cookpad Recipes (Auto Detail)",
+          "desc": "Search recipes from Cookpad Indonesia and include detailed info automatically",
+          "path": "/search/cookpad?q=",
+          "status": "ready",
+          "params": {
+            "q": "Recipe keyword (e.g. ayam kecap)"
+          }
+        },
+        {
+          "name": "Lyrics Search",
+          "desc": "Search for lyrics from LrcLib.net",
+          "path": "/search/lyrics?q=",
+          "status": "ready",
+          "params": {
+            "q": "Song title or artist name"
+          }
+        },
+        {
+          "name": "YouTube Search",
+          "desc": "Search videos on YouTube and return metadata",
+          "path": "/search/youtube?q=",
+          "status": "ready",
+          "params": {
+            "q": "Search query (e.g. song title, channel, keyword)",
+            "limit": "Number of results to fetch (default: 10)"
+          }
+        },
+        {
+          "name": "TikTok Search",
+          "desc": "Search videos on TikTok and return metadata",
+          "path": "/search/tiktok?q=",
+          "status": "ready",
+          "params": {
+            "q": "Keyword to search TikTok videos"
+          }
+        },
+        {
+          "name": "AsianToLick (Auto Detail)",
+          "desc": "🔞 NSFW: Search adult albums from AsianToLick and include full detail automatically",
+          "path": "/search/atl?q=",
+          "status": "ready",
+          "params": {
+            "q": "Search keyword (e.g. japanese, schoolgirl)"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Random Images",
+      "items": [
+        {
+          "name": "Blue Archive",
+          "desc": "Get random high-quality Blue Archive character images",
+          "path": "/random/ba",
+          "status": "ready"
+        },
+        {
+          "name": "Random Neko",
+          "desc": "🔞 Fetch random anime Neko images (may contain mild NSFW variants)",
+          "path": "/api/r/neko",
+          "status": "ready"
+        },
+        {
+          "name": "Anh.moe Random",
+          "desc": "🔞 Get random images or videos from anh.moe (SFW/NSFW/MOE/AI/etc)",
+          "path": "/random/anhmoe?category=",
+          "status": "ready",
+          "params": {
+            "category": "Category type (sfw, nsfw, video-nsfw, video-gore, moe, ai-picture, hentai)"
+          }
+        },
+        {
+          "name": "Random Waifu",
+          "desc": "Fetch random anime Waifu images (SFW only)",
+          "path": "/api/r/waifu",
+          "status": "ready"
+        },
+        {
+          "name": "Anime Quotes",
+          "desc": "Fetch random quotes from anime characters",
+          "path": "/api/r/quotesanime",
+          "status": "ready"
+        }
+      ]
+    },
+    {
+      "name": "Downloaders",
+      "items": [
+        {
+          "name": "Pinterest Downloader",
+          "desc": "Download images, videos, or GIFs from Pinterest pins",
+          "path": "/downloader/pinterest?url=",
+          "status": "ready",
+          "params": {
+            "url": "Pinterest pin URL"
+          }
+        },
+        {
+          "name": "Xiaohongshu Downloader",
+          "desc": "Download videos or images from Xiaohongshu (RED) posts",
+          "path": "/downloader/xiaohongshu?url=",
+          "status": "ready",
+          "params": {
+            "url": "Xiaohongshu post URL"
+          }
+        },
+        {
+          "name": "YouTube Video DL",
+          "desc": "Download videos from YouTube",
+          "path": "/downloader/youtube?url=",
+          "status": "ready",
+          "params": {
+            "url": "YouTube video URL",
+            "format": "Video format (mp4, audio, 720p, 1080p)"
+          }
+        },
+        {
+          "name": "Douyin Downloader",
+          "desc": "Download videos (with HD & audio options) from Douyin",
+          "path": "/api/d/douyin?url=",
+          "status": "ready",
+          "params": {
+            "url": "Douyin video URL"
+          }
+        },
+        {
+          "name": "TikTok Downloader",
+          "desc": "Download videos (with/without watermark) from TikTok",
+          "path": "/api/d/tiktok?url=",
+          "status": "ready",
+          "params": {
+            "url": "TikTok video URL"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Tools",
+      "items": [
+        {
+          "name": "Remini",
+          "desc": "Enhance the quality of a low-resolution image using AI",
+          "path": "/api/enhance/image?url=",
+          "status": "ready",
+          "params": {
+            "url": "Public image URL"
+          }
+        },
+        {
+          "name": "Image OCR",
+          "desc": "Extract text from images using AI-powered OCR",
+          "path": "/api/ocr/image?url=",
+          "status": "ready",
+          "params": {
+            "url": "Image URL"
+          }
+        },
+        {
+          "name": "Removebg",
+          "desc": "Remove image background using AI",
+          "path": "/tools/removebg?url=",
+          "status": "ready",
+          "params": {
+            "url": "Image URL"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Image Makers",
+      "items": [
+        {
+          "name": "BRAT Generator",
+          "desc": "Generate BRAT-style text images with customizable colors and backgrounds",
+          "path": "/maker/brat?text=Hello World",
+          "status": "ready",
+          "params": {
+            "text": "Text to be inserted into the BRAT image"
+          }
+        },
+        {
+          "name": "BRAT Video Generator",
+          "desc": "Generate animated BRAT-style text videos with customizable colors and backgrounds",
+          "path": "/maker/bratvid?text=Hello World",
+          "status": "ready",
+          "params": {
+            "text": "Text to be inserted into the BRAT video"
+          }
+        }
+      ]
+    }
+  ],
+  "apiKeys": [
+    {
+      "key": "hanzyy001",
+      "name": "hanzyy001",
+      "category": "premium",
+      "ratelimit": "unlimited",
+      "active": true,
+      "createdAt": "2025-10-05T04:45:58.171Z"
+    }
+  ]
+}
