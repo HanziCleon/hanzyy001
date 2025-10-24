@@ -11,5 +11,11 @@
       "src": "/(.*)",
       "dest": "index.js"
     }
-  ]
+  ],
+  "env": {
+    "NODE_ENV": "production"
+  },
+  "installCommand": "npm install",
+  "buildCommand": "echo 'No build step required'",
+  "outputDirectory": "."
 }
