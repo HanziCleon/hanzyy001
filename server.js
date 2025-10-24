@@ -1,433 +1,511 @@
 import express from "express";
-import axios from "axios";
-import * as cheerio from "cheerio";
+import fs from "fs";
+import path from "path";
+import { fileURLToPath } from "url";
 import chalk from "chalk";
-import https from "https";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const app = express();
-app.use(express.json());
-const PORT = process.env.PORT || 3000;
-const ENV = process.env.NODE_ENV || 'development';
+
+// Load settings
+const settings = JSON.parse(fs.readFileSync("./settings.json", "utf-8"));
+const PORT = process.env.PORT || settings.port;
 const IS_VERCEL = !!process.env.VERCEL;
 
-const log = {
-  info: (msg) => console.log(IS_VERCEL ? `[INFO] ${msg}` : chalk.cyan(`ℹ️ [INFO] ${new Date().toISOString()} - ${msg}`)),
-  success: (msg) => console.log(IS_VERCEL ? `[SUCCESS] ${msg}` : chalk.green(`✅ [SUCCESS] ${new Date().toISOString()} - ${msg}`)),
-  error: (msg) => console.log(IS_VERCEL ? `[ERROR] ${msg}` : chalk.red(`❌ [ERROR] ${new Date().toISOString()} - ${msg}`)),
+// ===== MIDDLEWARE =====
+app.use(express.json({ limit: settings.requestLimit }));
+app.use(express.urlencoded({ extended: true, limit: settings.requestLimit }));
+
+// Simple Rate Limiter (in-memory)
+const rateLimitStore = new Map();
+export const rateLimit = (req, res, next) => {
+  const ip = req.ip || req.connection.remoteAddress;
+  const now = Date.now();
+  
+  if (!rateLimitStore.has(ip)) {
+    rateLimitStore.set(ip, { count: 1, resetTime: now + settings.rateLimit.windowMs });
+    return next();
+  }
+  
+  const record = rateLimitStore.get(ip);
+  
+  if (now > record.resetTime) {
+    record.count = 1;
+    record.resetTime = now + settings.rateLimit.windowMs;
+    return next();
+  }
+  
+  if (record.count >= settings.rateLimit.maxRequests) {
+    return res.status(429).json({
+      success: false,
+      error: "Too many requests. Please try again later.",
+      retryAfter: Math.ceil((record.resetTime - now) / 1000)
+    });
+  }
+  
+  record.count++;
+  next();
 };
 
-app.use((req, res, next) => { log.info(`📡 ${req.method} ${req.url}`); next(); });
-
-const css = `*{margin:0;padding:0;box-sizing:border-box}body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0f172a;color:#e2e8f0;min-height:100vh;padding:20px}.container{max-width:1100px;margin:0 auto}header{text-align:center;padding:25px 0;margin-bottom:25px}h1{font-size:clamp(24px,5vw,34px);font-weight:700;background:linear-gradient(135deg,#667eea,#764ba2);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}.badge{display:inline-block;padding:5px 12px;background:rgba(102,126,234,0.15);border:1px solid rgba(102,126,234,0.3);border-radius:15px;font-size:11px;margin-left:8px;font-weight:600;color:#667eea}.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px}.card{background:rgba(30,41,59,0.5);border:1px solid rgba(102,126,234,0.15);border-radius:10px;padding:16px;cursor:pointer;transition:all 0.2s;margin-bottom:14px}.card:hover{border-color:rgba(102,126,234,0.4);background:rgba(30,41,59,0.7);transform:translateY(-1px)}.card-content{pointer-events:none}.method{display:inline-block;padding:3px 8px;border-radius:4px;font-size:9px;font-weight:700;margin-bottom:8px;background:rgba(16,185,129,0.2);color:#10b981}.card-title{font-size:14px;font-weight:600;margin-bottom:6px}.card-desc{font-size:12px;color:rgba(255,255,255,0.5);line-height:1.4}.panel{background:rgba(15,23,42,0.8);border:1px solid rgba(102,126,234,0.2);border-radius:10px;padding:16px;margin-bottom:14px;max-height:0;overflow:hidden;transition:all 0.3s ease;margin-top:-14px}.panel.active{max-height:1000px;padding:16px;margin-top:0;margin-bottom:14px}.form-group{margin-bottom:12px}.label{display:block;font-size:11px;font-weight:600;color:#94a3b8;margin-bottom:5px;text-transform:uppercase}input,textarea{width:100%;padding:9px 12px;background:rgba(30,41,59,0.6);border:1px solid rgba(102,126,234,0.15);border-radius:6px;color:#e2e8f0;font-size:12px;font-family:inherit;transition:all 0.2s}input::placeholder,textarea::placeholder{color:rgba(148,163,184,0.4)}input:focus,textarea:focus{outline:0;background:rgba(30,41,59,0.8);border-color:rgba(102,126,234,0.4)}.category-btns{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px}.category-btn{padding:8px 12px;background:rgba(102,126,234,0.1);border:1px solid rgba(102,126,234,0.15);border-radius:5px;color:#94a3b8;cursor:pointer;font-size:11px;transition:all 0.2s;font-weight:500;white-space:nowrap}.category-btn.active{background:rgba(102,126,234,0.3);border-color:rgba(102,126,234,0.4);color:#667eea}.btn{width:100%;padding:10px;background:linear-gradient(135deg,#667eea,#764ba2);border:0;border-radius:6px;color:#fff;font-weight:600;font-size:12px;cursor:pointer;transition:all 0.2s;margin-top:10px}.btn:hover{transform:translateY(-1px)}.result{margin-top:12px;padding:12px;background:rgba(0,0,0,0.2);border-radius:6px;border:1px solid rgba(102,126,234,0.1);max-height:600px;overflow-y:auto;font-size:11px;line-height:1.5;color:#cbd5e1}pre{white-space:pre-wrap;word-break:break-all;font-family:monospace;font-size:10px;background:rgba(0,0,0,0.3);padding:10px;border-radius:4px;overflow-x:auto}img.preview,video.preview{width:100%;border-radius:6px;margin-top:10px;max-height:300px;object-fit:contain}.loading{text-align:center;padding:15px;color:rgba(255,255,255,0.5);font-size:12px}.hidden{display:none}.error-msg{color:#ff6b6b;padding:10px;background:rgba(255,107,107,0.1);border-radius:4px;border:1px solid rgba(255,107,107,0.2);margin-bottom:10px}.success-msg{color:#51cf66;padding:10px;background:rgba(81,207,102,0.1);border-radius:4px;border:1px solid rgba(81,207,102,0.2);margin-bottom:10px}@media(max-width:640px){.grid{grid-template-columns:1fr}.result{max-height:400px}}`;
-
-const UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36';
-
-// ===== CLASSES =====
-
-class TikTok {
-  async download({ url }) {
-    try {
-      const { data } = await axios.get('https://www.tikwm.com/api/?url=' + encodeURIComponent(url), {headers: {'User-Agent': UA}, timeout: 10000});
-      return data?.data || {};
-    } catch(err) {
-      throw new Error('TikTok: ' + err.message);
+// Clean up rate limit store
+setInterval(() => {
+  const now = Date.now();
+  for (const [ip, record] of rateLimitStore.entries()) {
+    if (now > record.resetTime) {
+      rateLimitStore.delete(ip);
     }
   }
-}
-const tiktok = new TikTok();
+}, 5 * 60 * 1000);
 
-class Anhmoe {
-  #baseURL = "https://anh.moe";
-  #headers = {"Origin": "https://anh.moe", "Referer": "https://anh.moe/", "User-Agent": "Zanixon/1.0.0"};
-  #api;
+// Simple Cache (in-memory)
+const cache = new Map();
+export const cacheMiddleware = (duration = settings.cache.ttl) => (req, res, next) => {
+  if (req.method !== "GET") return next();
   
-  constructor() { 
-    this.#api = axios.create({baseURL: this.#baseURL, timeout: 30000, headers: this.#headers}); 
+  const key = req.originalUrl;
+  const cached = cache.get(key);
+  
+  if (cached && (Date.now() - cached.timestamp < duration)) {
+    return res.json({ ...cached.data, cached: true });
   }
   
-  async getCategory(category) {
-    try {
-      const raw = await this.#api(`/category/${category}`);
-      const $ = cheerio.load(raw.data);
-      const items = [];
-      $(".list-item").each((_, el) => {
-        try {
-          const $el = $(el);
-          let data = {};
-          const rawData = $el.attr("data-object");
-          if(rawData) data = JSON.parse(decodeURIComponent(rawData));
-          
-          const title = $el.find(".list-item-desc-title a").attr("title") || data.title || 'No title';
-          const imgUrl = data.image?.url || $el.find('img').attr('src') || '';
-          
-          if (imgUrl) {
-            items.push({
-              type: data.type || 'image',
-              title,
-              image: { url: imgUrl },
-              video: { url: imgUrl }
-            });
-          }
-        } catch(e) {}
-      });
-      if (!items.length) throw new Error('No items found');
-      return items;
-    } catch(err) {
-      throw new Error('Anh.moe: ' + err.message);
+  res.originalJson = res.json;
+  res.json = function(data) {
+    if (cache.size >= settings.cache.maxSize) {
+      const firstKey = cache.keys().next().value;
+      cache.delete(firstKey);
     }
-  }
-}
-const anh = new Anhmoe();
+    cache.set(key, { data, timestamp: Date.now() });
+    return res.originalJson(data);
+  };
+  
+  next();
+};
 
-async function scrapeXvideosSearch(query) {
-  try {
-    const resp = await axios.get('https://www.xvideos.com/?k=' + encodeURIComponent(query) + '&p=1', {
-      headers: {'User-Agent': UA},
-      timeout: 10000
-    });
-    const $ = cheerio.load(resp.data);
-    const res = [];
-    
-    $('div[id^="video_"]').each((_, el) => {
-      try {
-        const $el = $(el);
-        const link = $el.find('a[href*="/video"]').first();
-        const url = link.attr('href');
-        const title = link.attr('title') || 'Video';
-        const cover = $el.find('img').attr('data-src') || $el.find('img').attr('src');
-        
-        if (url && url.includes('/video')) {
-          res.push({
-            title: title.substring(0, 80),
-            url: url.startsWith('http') ? url : 'https://www.xvideos.com' + url,
-            thumbnail: cover || null
-          });
-        }
-      } catch(e) {}
-    });
-    
-    return res.slice(0, 10);
-  } catch(err) {
-    throw new Error('XVideos: ' + err.message);
-  }
-}
+// Apply rate limiting to all API routes
+app.use("/api/", rateLimit);
 
-async function scrapeXnxxSearch(query) {
-  try {
-    const resp = await axios.get('https://www.xnxx.com/search/' + encodeURIComponent(query) + '/1', {
-      headers: {'User-Agent': UA},
-      timeout: 10000
-    });
-    const $ = cheerio.load(resp.data);
-    const results = [];
-    
-    $('div.thumbwrap').each((_, el) => {
-      try {
-        const $el = $(el);
-        const link = $el.find('a').first();
-        const url = link.attr('href');
-        const title = link.attr('title') || 'Video';
-        const cover = $el.find('img').attr('data-src') || $el.find('img').attr('src');
-        
-        if (url && url.includes('/video')) {
-          results.push({
-            title: title.substring(0, 80),
-            url: url.startsWith('http') ? url : 'https://www.xnxx.com' + url,
-            thumbnail: cover || null
-          });
-        }
-      } catch(e) {}
-    });
-    
-    return results.slice(0, 10);
-  } catch(err) {
-    throw new Error('XNXX: ' + err.message);
-  }
-}
+// Request Logger
+app.use((req, res, next) => {
+  const start = Date.now();
+  res.on("finish", () => {
+    const duration = Date.now() - start;
+    const status = res.statusCode;
 
-async function getPornhubInfo(url) {
-  return new Promise((resolve, reject) => {
-    const payload = JSON.stringify({ platform: 'Pornhub', url, app_id: 'pornhub_downloader' });
-    const options = {
-      hostname: 'download.pornhubdownloader.io',
-      path: '/xxx-download/video-info-v3',
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'User-Agent': UA,
-        'Content-Length': Buffer.byteLength(payload),
-      },
-      timeout: 15000
-    };
-    
-    const req = https.request(options, res => {
-      let body = '';
-      res.setEncoding('utf8');
-      res.on('data', chunk => body += chunk);
-      res.on('end', () => {
-        try { resolve(JSON.parse(body)); } 
-        catch(e) { reject(new Error('Invalid response')); }
-      });
-    });
-    
-    req.on('error', err => reject(err));
-    req.on('timeout', () => reject(new Error('Timeout')));
-    req.write(payload);
-    req.end();
+    const paint =
+      status >= 500 ? chalk.red :
+      status >= 400 ? chalk.yellow :
+      chalk.green;
+
+    console.log(
+      paint(
+        `[${new Date().toISOString()}] ${req.method} ${req.path} ${status} ${duration}ms`
+      )
+    );
   });
-}
+  next();
+});
 
-class PornhubScraper {
-  async search(query) {
+// ===== UTILITIES =====
+export const log = {
+  success: (m) => console.log(chalk.green(`✅ ${m}`)),
+  error: (m) => console.log(chalk.red(`❌ ${m}`)),
+  info: (m) => console.log(chalk.blue(`ℹ️  ${m}`)),
+  warn: (m) => console.log(chalk.yellow(`⚠️  ${m}`))
+};
+
+export const validate = {
+  url: (url, domain = null) => {
+    if (!url || typeof url !== "string") return false;
     try {
-      const url = 'https://www.pornhub.com/video/search?search=' + encodeURIComponent(query);
-      const res = await axios.get(url, {
-        headers: { 'User-Agent': UA, 'Referer': 'https://www.pornhub.com/' },
-        timeout: 15000,
-      });
-      const $ = cheerio.load(res.data);
-      const results = [];
-      
-      $('li.pcVideoListItem').each((_, el) => {
-        try {
-          const $el = $(el);
-          const link = $el.find('a').first();
-          const href = link.attr('href') || '';
-          
-          if (!href.includes('view_video')) return;
-          
-          const title = link.attr('title') || 'Video';
-          const thumb = $el.find('img').attr('src');
-          
-          results.push({
-            title: title.substring(0, 80),
-            url: href.startsWith('http') ? href : 'https://www.pornhub.com' + href,
-            thumbnail: thumb || null
-          });
-        } catch(e) {}
-      });
-      
-      return results.slice(0, 10);
-    } catch(err) {
-      throw new Error('Pornhub: ' + err.message);
+      const parsed = new URL(url);
+      if (domain) return parsed.hostname.includes(domain);
+      return parsed.protocol === "http:" || parsed.protocol === "https:";
+    } catch {
+      return false;
+    }
+  },
+  notEmpty: (str) => str && typeof str === "string" && str.trim().length > 0
+};
+
+// ===== AUTO-LOAD ENDPOINTS =====
+const endpoints = [];
+const routerPath = path.join(__dirname, "router");
+
+if (fs.existsSync(routerPath)) {
+  const files = fs.readdirSync(routerPath).filter(f => f.endsWith(".js"));
+  
+  for (const file of files) {
+    try {
+      const module = await import(`./router/${file}`);
+      if (module.default) {
+        const endpoint = module.default;
+        
+        // Register route
+        if (endpoint.method === "GET") {
+          app.get(endpoint.path, endpoint.handler);
+        } else if (endpoint.method === "POST") {
+          app.post(endpoint.path, endpoint.handler);
+        }
+        
+        // Store metadata for docs
+        endpoints.push({
+          name: endpoint.name,
+          path: endpoint.path,
+          method: endpoint.method,
+          description: endpoint.description,
+          category: endpoint.category || "Miscellaneous",
+          params: endpoint.params || []
+        });
+        
+        log.success(`Loaded: ${endpoint.method} ${endpoint.path}`);
+      }
+    } catch (err) {
+      log.error(`Failed to load ${file}: ${err.message}`);
     }
   }
 }
-const pornhubScraper = new PornhubScraper();
 
-// ===== ROUTES =====
+// Make endpoints available globally
+app.locals.endpoints = endpoints;
 
-app.get("/api/d/tiktok", async (req, res) => {
-  try {
-    if (!req.query.url) return res.status(400).json({status: false, error: "URL required"});
-    const result = await tiktok.download({url: req.query.url});
-    res.json({status: true, result});
-  } catch(err) {
-    res.status(500).json({status: false, error: err.message});
-  }
-});
-
-app.get("/random/ba", async (req, res) => {
-  try {
-    const { data } = await axios.get("https://raw.githubusercontent.com/rynxzyy/blue-archive-r-img/refs/heads/main/links.json", {timeout: 10000});
-    const imgUrl = data[Math.floor(Math.random() * data.length)];
-    const imgRes = await axios.get(imgUrl, {responseType: "arraybuffer", timeout: 10000});
-    res.writeHead(200, {"Content-Type": "image/jpeg"});
-    res.end(Buffer.from(imgRes.data));
-  } catch(err) {
-    res.status(500).json({error: err.message});
-  }
-});
-
-app.get("/random/china", async (req, res) => {
-  try {
-    const { data } = await axios.get("https://github.com/ArifzynXD/database/raw/master/asupan/china.json", {timeout: 10000});
-    const rand = data[Math.floor(Math.random() * data.length)];
-    const imgRes = await axios.get(rand.url, {responseType: "arraybuffer", timeout: 10000});
-    res.writeHead(200, {"Content-Type": "image/jpeg"});
-    res.end(Buffer.from(imgRes.data));
-  } catch(err) {
-    res.status(500).json({error: err.message});
-  }
-});
-
-app.post('/n18', async (req, res) => {
-  try {
-    const { action, source, query } = req.body;
-    if (!action || !source || !query) return res.status(400).json({ error: "Missing params" });
-    
-    let results = [];
-    if (source === "xv") results = await scrapeXvideosSearch(query);
-    else if (source === "xn") results = await scrapeXnxxSearch(query);
-    
-    res.json({ results });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-app.post('/api/pornhub/search', async (req, res) => {
-  try {
-    const { query } = req.body;
-    if (!query) return res.status(400).json({ error: "Query required" });
-    const results = await pornhubScraper.search(query);
-    res.json({ results });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-app.post('/api/pornhub/info', async (req, res) => {
-  try {
-    const { url } = req.body;
-    if (!url) return res.status(400).json({ error: "URL required" });
-    const data = await getPornhubInfo(url);
-    res.json(data);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-app.post('/api/anhmoe/random', async (req, res) => {
-  try {
-    const { category } = req.body;
-    if (!category) return res.status(400).json({ error: "Category required" });
-    const items = await anh.getCategory(category);
-    const item = items[Math.floor(Math.random() * items.length)];
-    res.json({ item });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
+// ===== HEALTH CHECK =====
 app.get("/health", (req, res) => {
-  res.json({status: "ok", env: ENV, platform: IS_VERCEL ? "vercel" : "termux"});
+  res.json({
+    status: "ok",
+    uptime: Math.floor(process.uptime()),
+    timestamp: new Date().toISOString(),
+    cache_size: cache.size,
+    rate_limit_ips: rateLimitStore.size,
+    total_endpoints: endpoints.length
+  });
+});
+
+// ===== API INFO =====
+app.get("/api", (req, res) => {
+  const groupedEndpoints = {};
+  
+  endpoints.forEach(ep => {
+    if (!groupedEndpoints[ep.category]) {
+      groupedEndpoints[ep.category] = [];
+    }
+    groupedEndpoints[ep.category].push({
+      name: ep.name,
+      path: ep.path,
+      method: ep.method,
+      description: ep.description,
+      params: ep.params
+    });
+  });
+  
+  res.json({
+    name: settings.name,
+    version: settings.version,
+    total_endpoints: endpoints.length,
+    categories: groupedEndpoints,
+    rate_limit: `${settings.rateLimit.maxRequests} requests per ${settings.rateLimit.windowMs / 60000} minutes`,
+    cache_ttl: `${settings.cache.ttl / 1000} seconds`
+  });
 });
 
 // ===== FRONTEND =====
-
 app.get("/", (req, res) => {
-  const html = `<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>API Panel</title>
-<style>${css}</style>
-</head>
-<body>
-<div class="container">
-<header><h1>🚀 API Panel <span class="badge">${IS_VERCEL ? 'VERCEL' : 'TERMUX'}</span></h1></header>
-<div id="content"></div>
-</div>
-<script>
-const endpoints=[
-{id:'tiktok',title:'TikTok Download'},
-{id:'ba',title:'Blue Archive'},
-{id:'china',title:'Random China'},
-{id:'anhmoe',title:'Anh.moe Random'},
-{id:'xv',title:'XVideos Search'},
-{id:'xn',title:'XNXX Search'},
-{id:'ph_search',title:'Pornhub Search'},
-{id:'ph_info',title:'Pornhub Info'},
-];
-
-let expandedId=null, selectedCategory='sfw';
-
-function render(){
-  const c=document.getElementById('content');
-  c.innerHTML=endpoints.map(e=>'<div><div class="card" onclick="toggle(\\''+e.id+'\\')"><div class="card-content"><span class="method">GET</span><div class="card-title">'+e.title+'</div></div></div><div class="panel" id="p-'+e.id+'"></div></div>').join('');
-}
-
-function toggle(id){
-  if(expandedId&&expandedId!==id){const o=document.getElementById('p-'+expandedId);if(o)o.classList.remove('active');}
-  const p=document.getElementById('p-'+id);
-  p.classList.toggle('active');
-  expandedId=p.classList.contains('active')?id:null;
-  if(expandedId)buildPanel(id,p);
-}
-
-function buildPanel(id,el){
-  let h='';
-  if(id==='tiktok') h='<div class="form-group"><label class="label">TikTok URL</label><input id="tt" placeholder="https://vt.tiktok.com/..."/></div><button class="btn" onclick="call(\\'tiktok\\')">Download</button>';
-  else if(id==='ba'||id==='china') h='<button class="btn" onclick="call(\\''+id+'\\')">Load</button>';
-  else if(id==='anhmoe'){
-    h='<div class="form-group"><label class="label">Category</label><div class="category-btns">';
-    ['sfw','nsfw','video-gore','video-nsfw','moe','ai-picture','hentai'].forEach(cat=>h+='<button class="category-btn '+(cat==='sfw'?'active':'')+'" onclick="setCat(\\''+cat+'\\')">'+cat+'</button>');
-    h+='</div></div><button class="btn" onclick="call(\\'anhmoe\\')">Load</button>';
-  }else if(id==='ph_search') h='<div class="form-group"><label class="label">Search</label><input id="phs" placeholder="Search..."/></div><button class="btn" onclick="call(\\'ph_search\\')">Search</button>';
-  else if(id==='ph_info') h='<div class="form-group"><label class="label">Pornhub URL</label><input id="phi" placeholder="https://pornhub.com/..."/></div><button class="btn" onclick="call(\\'ph_info\\')">Info</button>';
-  else if(id==='xv'||id==='xn') h='<div class="form-group"><label class="label">Search</label><input id="s'+id+'" placeholder="Search..."/></div><button class="btn" onclick="call(\\''+id+'\\')">Search</button>';
-  h+='<div id="r-'+id+'" class="result hidden"></div>';
-  el.innerHTML=h;
-}
-
-function setCat(cat){selectedCategory=cat;document.querySelectorAll('.category-btn').forEach(b=>b.classList.remove('active'));event.target.classList.add('active');}
-
-async function call(id){
-  const r=document.getElementById('r-'+id);
-  r.classList.remove('hidden');
-  r.innerHTML='<div class="loading">Loading...</div>';
-  try{
-    if(id==='tiktok'){
-      const u=document.getElementById('tt').value.trim();
-      if(!u)throw new Error('URL required');
-      const res=await fetch('/api/d/tiktok?url='+encodeURIComponent(u));
-      const d=await res.json();
-      r.innerHTML='<div class="success-msg">Success!</div><pre>'+JSON.stringify(d,null,2)+'</pre>';
-    }else if(id==='ba'){
-      const res=await fetch('/random/ba');
-      const b=await res.blob();
-      r.innerHTML='<img class="preview" src="'+URL.createObjectURL(b)+'"/>';
-    }else if(id==='china'){
-      const res=await fetch('/random/china');
-      const b=await res.blob();
-      r.innerHTML='<img class="preview" src="'+URL.createObjectURL(b)+'"/>';
-    }else if(id==='anhmoe'){
-      const res=await fetch('/api/anhmoe/random',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({category:selectedCategory})});
-      const d=await res.json();
-      if(!res.ok)throw new Error(d.error);
-      const i=d.item;
-      r.innerHTML=i.image.url?'<img class="preview" src="'+i.image.url+'"/>':'<div class="error-msg">No media</div>';
-    }else if(id==='ph_search'){
-      const q=document.getElementById('phs').value.trim();
-      if(!q)throw new Error('Query required');
-      const res=await fetch('/api/pornhub/search',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({query:q})});
-      const d=await res.json();
-      if(!res.ok)throw new Error(d.error);
-      let h='<div class="success-msg">Found '+d.results.length+' results</div>';
-      d.results.forEach((it,i)=>h+='<div style="margin:8px 0;padding:8px;background:rgba(102,126,234,0.1);border-radius:4px"><strong>'+i+'.</strong> '+it.title+'</div>');
-      h+='<pre style="margin-top:15px">'+JSON.stringify(d,null,2)+'</pre>';
-      r.innerHTML=h;
-    }else if(id==='ph_info'){
-      const u=document.getElementById('phi').value.trim();
-      if(!u)throw new Error('URL required');
-      const res=await fetch('/api/pornhub/info',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({url:u})});
-      const d=await res.json();
-      r.innerHTML='<pre>'+JSON.stringify(d,null,2)+'</pre>';
-    }else if(id==='xv'||id==='xn'){
-      const q=document.getElementById('s'+id).value.trim();
-      if(!q)throw new Error('Query required');
-      const res=await fetch('/n18',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'search',source:id,query:q})});
-      const d=await res.json();
-      if(!res.ok)throw new Error(d.error);
-      let h='<div class="success-msg">Found '+d.results.length+' results</div>';
-      d.results.forEach((it,i)=>h+='<div style="margin:8px 0;padding:8px;background:rgba(102,126,234,0.1);border-radius:4px"><strong>'+i+'.</strong> '+it.title+'</div>');
-      h+='<pre style="margin-top:15px">'+JSON.stringify(d,null,2)+'</pre>';
-      r.innerHTML=h;
-    }
-  }catch(err){r.innerHTML='<div class="error-msg">Error: '+err.message+'</div>';}
-}
-
-render();
-</script>
-</body>
-</html>`;
-  res.send(html);
+  res.sendFile(path.join(__dirname, "index.html"));
 });
 
-export default app;
+// ===== DOCS PAGE =====
+app.get("/docs", (req, res) => {
+  const docsHTML = generateDocsHTML(endpoints);
+  res.send(docsHTML);
+});
 
-if (!IS_VERCEL) {
-  app.listen(PORT, "0.0.0.0", () => log.success("Server running at http://localhost:" + PORT));
+// ===== ERROR HANDLER =====
+app.use((err, req, res, next) => {
+  log.error(`${req.method} ${req.path} - ${err.message}`);
+  const statusCode = err.statusCode || 500;
+  const message = err.message || "Internal Server Error";
+  res.status(statusCode).json({
+    success: false,
+    error: message,
+    path: req.path,
+    timestamp: new Date().toISOString()
+  });
+});
+
+// 404 Handler
+app.use((req, res) => {
+  res.status(404).json({
+    success: false,
+    error: "Endpoint not found",
+    path: req.path,
+    available_endpoints: "/api"
+  });
+});
+
+// ===== DOCS HTML GENERATOR =====
+function generateDocsHTML(endpoints) {
+  const groupedEndpoints = {};
+  endpoints.forEach(ep => {
+    if (!groupedEndpoints[ep.category]) {
+      groupedEndpoints[ep.category] = [];
+    }
+    groupedEndpoints[ep.category].push(ep);
+  });
+
+  let endpointsHTML = "";
+  
+  for (const [category, eps] of Object.entries(groupedEndpoints)) {
+    const icon = getCategoryIcon(category);
+    endpointsHTML += `
+      <div class="category">
+        <div class="category-title">${icon} ${category}</div>`;
+    
+    eps.forEach(ep => {
+      const searchTerms = `${ep.name} ${ep.description} ${ep.path}`.toLowerCase();
+      endpointsHTML += `
+        <div class="endpoint" data-search="${searchTerms}">
+          <div class="endpoint-header" onclick="toggleEndpoint(this)">
+            <span class="method ${ep.method.toLowerCase()}">${ep.method}</span>
+            <span class="endpoint-path">${ep.path}</span>
+            <span class="endpoint-title">${ep.name}</span>
+            <span class="expand-icon">▼</span>
+          </div>
+          <div class="endpoint-body">
+            <div class="endpoint-content">
+              <div class="description">${ep.description}</div>`;
+      
+      if (ep.params && ep.params.length > 0) {
+        ep.params.forEach(param => {
+          const required = param.required ? '<span class="required">*</span>' : '';
+          const inputType = param.type === "textarea" ? "textarea" : 
+                           param.type === "select" ? "select" : "input";
+          
+          endpointsHTML += `
+              <div class="form-group">
+                <label class="form-label">${param.name} ${required}</label>`;
+          
+          if (inputType === "textarea") {
+            endpointsHTML += `<textarea placeholder="${param.placeholder || ''}" data-param="${param.name}"></textarea>`;
+          } else if (inputType === "select" && param.options) {
+            endpointsHTML += `<select data-param="${param.name}">`;
+            param.options.forEach(opt => {
+              endpointsHTML += `<option value="${opt.value}">${opt.label}</option>`;
+            });
+            endpointsHTML += `</select>`;
+          } else {
+            const inputTypeAttr = param.type === "number" ? "number" : "text";
+            endpointsHTML += `<input type="${inputTypeAttr}" placeholder="${param.placeholder || ''}" data-param="${param.name}">`;
+          }
+          
+          if (param.description) {
+            endpointsHTML += `<div class="form-help">${param.description}</div>`;
+          }
+          endpointsHTML += `</div>`;
+        });
+      }
+      
+      const paramNames = ep.params ? ep.params.map(p => p.name) : [];
+      const isBinary = ep.responseBinary || false;
+      
+      endpointsHTML += `
+              <button class="btn-execute" onclick="executeRequest(this, '${ep.method}', '${ep.path}', ${JSON.stringify(paramNames)}, ${isBinary})">▶️ Execute</button>
+              <div class="response-section"></div>
+            </div>
+          </div>
+        </div>`;
+    });
+    
+    endpointsHTML += `</div>`;
+  }
+
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>API Documentation</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #0f172a; color: #e2e8f0; padding: 20px; }
+    .container { max-width: 1400px; margin: 0 auto; }
+    .header { background: linear-gradient(135deg, rgba(102,126,234,0.1), rgba(118,75,162,0.1)); border: 1px solid rgba(102,126,234,0.2); border-radius: 12px; padding: 30px; margin-bottom: 30px; }
+    .header h1 { background: linear-gradient(135deg, #667eea, #764ba2); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-size: 2.5em; margin-bottom: 10px; }
+    .header p { color: #94a3b8; font-size: 1.1em; }
+    .search-box { background: rgba(30,41,59,0.5); border: 1px solid rgba(102,126,234,0.2); border-radius: 8px; padding: 12px 20px; margin-bottom: 30px; display: flex; align-items: center; gap: 10px; }
+    .search-box input { flex: 1; background: transparent; border: none; color: #e2e8f0; font-size: 14px; outline: none; }
+    .search-box input::placeholder { color: #64748b; }
+    .category { margin-bottom: 40px; }
+    .category-title { font-size: 1.5em; color: #667eea; margin-bottom: 20px; padding-bottom: 10px; border-bottom: 2px solid rgba(102,126,234,0.2); }
+    .endpoint { background: rgba(30,41,59,0.5); border: 1px solid rgba(102,126,234,0.15); border-radius: 10px; margin-bottom: 15px; overflow: hidden; transition: all 0.3s; }
+    .endpoint:hover { border-color: rgba(102,126,234,0.4); }
+    .endpoint-header { padding: 20px; cursor: pointer; display: flex; align-items: center; gap: 15px; transition: background 0.2s; }
+    .endpoint-header:hover { background: rgba(30,41,59,0.7); }
+    .method { padding: 6px 12px; border-radius: 6px; font-weight: 600; font-size: 12px; min-width: 60px; text-align: center; }
+    .method.get { background: rgba(34,197,94,0.2); color: #22c55e; }
+    .method.post { background: rgba(59,130,246,0.2); color: #3b82f6; }
+    .endpoint-path { font-family: "Courier New", monospace; color: #e2e8f0; font-size: 14px; flex: 1; }
+    .endpoint-title { color: #94a3b8; font-size: 13px; }
+    .expand-icon { color: #667eea; transition: transform 0.3s; }
+    .endpoint.active .expand-icon { transform: rotate(180deg); }
+    .endpoint-body { max-height: 0; overflow: hidden; transition: max-height 0.3s ease; border-top: 1px solid rgba(102,126,234,0.1); }
+    .endpoint.active .endpoint-body { max-height: 2000px; }
+    .endpoint-content { padding: 25px; background: rgba(15,23,42,0.5); }
+    .description { color: #94a3b8; margin-bottom: 20px; line-height: 1.6; }
+    .form-group { margin-bottom: 20px; }
+    .form-label { display: block; color: #e2e8f0; font-size: 13px; font-weight: 600; margin-bottom: 8px; }
+    .required { color: #ef4444; }
+    .form-help { font-size: 12px; color: #64748b; margin-top: 4px; }
+    input[type="text"], input[type="number"], textarea, select { width: 100%; padding: 12px 16px; background: rgba(30,41,59,0.6); border: 1px solid rgba(102,126,234,0.2); border-radius: 6px; color: #e2e8f0; font-size: 14px; font-family: inherit; transition: all 0.2s; }
+    input:focus, textarea:focus, select:focus { outline: none; border-color: #667eea; background: rgba(30,41,59,0.8); }
+    textarea { resize: vertical; min-height: 80px; font-family: "Courier New", monospace; }
+    .btn-execute { background: linear-gradient(135deg, #667eea, #764ba2); color: white; border: none; padding: 12px 30px; border-radius: 6px; font-weight: 600; font-size: 14px; cursor: pointer; transition: all 0.2s; display: inline-flex; align-items: center; gap: 8px; }
+    .btn-execute:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(102,126,234,0.3); }
+    .btn-execute:active { transform: translateY(0); }
+    .btn-execute:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+    .response-section { margin-top: 25px; display: none; }
+    .response-section.show { display: block; }
+    .response-header { display: flex; justify-content: between; align-items: center; margin-bottom: 10px; }
+    .response-title { color: #667eea; font-weight: 600; font-size: 14px; }
+    .response-time { color: #94a3b8; font-size: 12px; }
+    .response-body { background: rgba(0,0,0,0.3); border: 1px solid rgba(102,126,234,0.2); border-radius: 6px; padding: 15px; max-height: 500px; overflow: auto; }
+    pre { color: #e2e8f0; font-size: 12px; line-height: 1.6; white-space: pre-wrap; word-break: break-all; margin: 0; }
+    .status-badge { display: inline-block; padding: 4px 10px; border-radius: 4px; font-size: 11px; font-weight: 600; margin-right: 10px; }
+    .status-success { background: rgba(34,197,94,0.2); color: #22c55e; }
+    .status-error { background: rgba(239,68,68,0.2); color: #ef4444; }
+    .loading { display: inline-block; width: 14px; height: 14px; border: 2px solid rgba(255,255,255,0.3); border-top-color: white; border-radius: 50%; animation: spin 0.8s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .back-link { display: inline-flex; align-items: center; gap: 8px; color: #667eea; text-decoration: none; font-size: 14px; margin-bottom: 20px; transition: all 0.2s; }
+    .back-link:hover { gap: 12px; }
+    ::-webkit-scrollbar { width: 8px; height: 8px; }
+    ::-webkit-scrollbar-track { background: rgba(30,41,59,0.5); }
+    ::-webkit-scrollbar-thumb { background: rgba(102,126,234,0.3); border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: rgba(102,126,234,0.5); }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <a href="/" class="back-link">← Back to Home</a>
+    <div class="header">
+      <h1>📚 API Documentation</h1>
+      <p>Interactive documentation with live testing for all ${endpoints.length} endpoints</p>
+    </div>
+    <div class="search-box">
+      <span>🔍</span>
+      <input type="text" id="searchInput" placeholder="Search endpoints..." onkeyup="filterEndpoints()">
+    </div>
+    <div id="endpoints">
+      ${endpointsHTML}
+    </div>
+  </div>
+  <script>
+    function toggleEndpoint(header) {
+      const endpoint = header.parentElement;
+      const wasActive = endpoint.classList.contains('active');
+      document.querySelectorAll('.endpoint').forEach(ep => ep.classList.remove('active'));
+      if (!wasActive) endpoint.classList.add('active');
+    }
+    function filterEndpoints() {
+      const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+      const endpoints = document.querySelectorAll('.endpoint');
+      const categories = document.querySelectorAll('.category');
+      endpoints.forEach(endpoint => {
+        const searchData = endpoint.getAttribute('data-search').toLowerCase();
+        endpoint.style.display = searchData.includes(searchTerm) ? 'block' : 'none';
+      });
+      categories.forEach(category => {
+        const visibleEndpoints = category.querySelectorAll('.endpoint');
+        const hasVisible = Array.from(visibleEndpoints).some(ep => ep.style.display !== 'none');
+        category.style.display = hasVisible || searchTerm === '' ? 'block' : 'none';
+      });
+    }
+    async function executeRequest(button, method, path, params, isBinary = false) {
+      const content = button.parentElement;
+      const responseSection = content.querySelector('.response-section');
+      const startTime = Date.now();
+      button.disabled = true;
+      button.innerHTML = '<span class="loading"></span> Loading...';
+      responseSection.innerHTML = '';
+      responseSection.classList.add('show');
+      try {
+        const body = {};
+        let url = path;
+        params.forEach(param => {
+          const input = content.querySelector(\`[data-param="\${param}"]\`);
+          if (input) {
+            const value = input.value.trim();
+            if (value) {
+              if (method === 'GET') {
+                url += (url.includes('?') ? '&' : '?') + param + '=' + encodeURIComponent(value);
+              } else {
+                body[param] = value;
+              }
+            }
+          }
+        });
+        const options = { method: method, headers: {} };
+        if (method === 'POST') {
+          options.headers['Content-Type'] = 'application/json';
+          options.body = JSON.stringify(body);
+        }
+        const response = await fetch(url, options);
+        const duration = Date.now() - startTime;
+        if (isBinary) {
+          if (response.ok) {
+            const blob = await response.blob();
+            const imageUrl = URL.createObjectURL(blob);
+            responseSection.innerHTML = \`
+              <div class="response-header">
+                <div><span class="status-badge status-success">200 OK</span><span class="response-title">Response</span></div>
+                <span class="response-time">\${duration}ms</span>
+              </div>
+              <div class="response-body"><img src="\${imageUrl}" style="max-width: 100%; border-radius: 8px;" /></div>
+            \`;
+          } else {
+            throw new Error(\`HTTP \${response.status}: \${response.statusText}\`);
+          }
+        } else {
+          const data = await response.json();
+          const statusClass = response.ok ? 'status-success' : 'status-error';
+          responseSection.innerHTML = \`
+            <div class="response-header">
+              <div><span class="status-badge \${statusClass}">\${response.status} \${response.statusText}</span><span class="response-title">Response</span></div>
+              <span class="response-time">\${duration}ms</span>
+            </div>
+            <div class="response-body"><pre>\${JSON.stringify(data, null, 2)}</pre></div>
+          \`;
+        }
+      } catch (error) {
+        const duration = Date.now() - startTime;
+        responseSection.innerHTML = \`
+          <div class="response-header">
+            <div><span class="status-badge status-error">ERROR</span><span class="response-title">Response</span></div>
+            <span class="response-time">\${duration}ms</span>
+          </div>
+          <div class="response-body"><pre style="color: #ef4444;">\${error.message}</pre></div>
+        \`;
+      } finally {
+        button.disabled = false;
+        button.innerHTML = '▶️ Execute';
+      }
+    }
+  </script>
+</body>
+</html>`;
 }
+
+function getCategoryIcon(category) {
+  const icons = {
+    "Social Media Downloads": "📱",
+    "Search Engines": "🔎",
+    "Image Processing": "🎨",
+    "Anime & Manga": "🎌",
+    "Random Images": "🎲",
+    "News & Miscellaneous": "📰",
+    "Miscellaneous": "🔧"
+  };
+  return icons[category] || "📦";
+}
+
+export default app;
