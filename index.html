@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>API Panel v2.0</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { 
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
+      background: #0f172a; 
+      color: #e2e8f0; 
+      padding: 20px; 
+    }
+    .container { max-width: 1200px; margin: 0 auto; }
+    h1 { 
+      background: linear-gradient(135deg, #667eea, #764ba2); 
+      -webkit-background-clip: text; 
+      -webkit-text-fill-color: transparent; 
+      margin-bottom: 20px; 
+      font-size: 2em; 
+    }
+    .stats { 
+      display: grid; 
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); 
+      gap: 15px; 
+      margin-bottom: 30px; 
+    }
+    .stat-card { 
+      background: rgba(30,41,59,0.5); 
+      border: 1px solid rgba(102,126,234,0.2); 
+      border-radius: 10px; 
+      padding: 20px; 
+    }
+    .stat-value { 
+      font-size: 2em; 
+      font-weight: bold; 
+      color: #667eea; 
+    }
+    .stat-label { 
+      font-size: 0.9em; 
+      color: #94a3b8; 
+      margin-top: 5px; 
+    }
+    .grid { 
+      display: grid; 
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); 
+      gap: 15px; 
+    }
+    .card { 
+      background: rgba(30,41,59,0.5); 
+      border: 1px solid rgba(102,126,234,0.15); 
+      border-radius: 10px; 
+      padding: 18px; 
+      cursor: pointer; 
+      transition: all 0.2s; 
+    }
+    .card:hover { 
+      border-color: rgba(102,126,234,0.4); 
+      transform: translateY(-2px); 
+      box-shadow: 0 8px 16px rgba(0,0,0,0.2); 
+    }
+    .card-title { 
+      font-weight: 600; 
+      font-size: 15px; 
+      color: #fff; 
+    }
+    .card-desc { 
+      font-size: 12px; 
+      color: #94a3b8; 
+      margin-top: 5px; 
+    }
+    .badge { 
+      display: inline-block; 
+      padding: 3px 8px; 
+      background: rgba(102,126,234,0.2); 
+      border-radius: 4px; 
+      font-size: 10px; 
+      color: #667eea; 
+      margin-top: 8px; 
+    }
+    .footer { 
+      text-align: center; 
+      margin-top: 50px; 
+      padding: 20px; 
+      color: #64748b; 
+      font-size: 13px; 
+    }
+    @keyframes pulse { 
+      0%, 100% { opacity: 1; } 
+      50% { opacity: 0.5; } 
+    }
+    .loading { animation: pulse 1.5s infinite; }
+    .endpoints-section { margin-top: 40px; }
+    .section-title { 
+      font-size: 1.5em; 
+      color: #667eea; 
+      margin-bottom: 20px; 
+      padding-bottom: 10px; 
+      border-bottom: 2px solid rgba(102,126,234,0.2); 
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🚀 API Panel v2.0</h1>
+    
+    <div class="stats" id="stats">
+      <div class="stat-card loading">
+        <div class="stat-value" id="uptime">--</div>
+        <div class="stat-label">Server Uptime</div>
+      </div>
+      <div class="stat-card loading">
+        <div class="stat-value" id="endpoints">--</div>
+        <div class="stat-label">Total Endpoints</div>
+      </div>
+      <div class="stat-card loading">
+        <div class="stat-value" id="cache">--</div>
+        <div class="stat-label">Cached Items</div>
+      </div>
+      <div class="stat-card loading">
+        <div class="stat-value" id="rate">--</div>
+        <div class="stat-label">Rate Limited IPs</div>
+      </div>
+    </div>
+    
+    <div class="grid">
+      <div class="card" onclick="window.location.href='/docs'">
+        <div class="card-title">📚 API Documentation</div>
+        <div class="card-desc">Interactive docs with live testing for all endpoints</div>
+        <span class="badge">GET /docs</span>
+      </div>
+      <div class="card" onclick="window.location.href='/api'">
+        <div class="card-title">📋 Endpoint List</div>
+        <div class="card-desc">View all available API endpoints in JSON format</div>
+        <span class="badge">GET /api</span>
+      </div>
+      <div class="card" onclick="window.location.href='/health'">
+        <div class="card-title">💚 Health Check</div>
+        <div class="card-desc">Monitor server status and performance</div>
+        <span class="badge">GET /health</span>
+      </div>
+    </div>
+
+    <div class="endpoints-section">
+      <div class="section-title">📡 Available Endpoints by Category</div>
+      <div id="endpointsList" class="loading">Loading endpoints...</div>
+    </div>
+    
+    <div class="footer">
+      <p>Made with ❤️ by Your Hanzy</p>
+      <p style="margin-top:10px;font-size:11px;" id="footerInfo">Loading configuration...</p>
+    </div>
+  </div>
+  
+  <script>
+    async function loadStats() {
+      try {
+        const res = await fetch('/health');
+        const data = await res.json();
+        document.getElementById('uptime').textContent = formatUptime(data.uptime);
+        document.getElementById('endpoints').textContent = data.total_endpoints || 0;
+        document.getElementById('cache').textContent = data.cache_size;
+        document.getElementById('rate').textContent = data.rate_limit_ips;
+        document.querySelectorAll('.stat-card').forEach(el => el.classList.remove('loading'));
+      } catch (err) {
+        console.error('Failed to load stats:', err);
+      }
+    }
+
+    async function loadEndpoints() {
+      try {
+        const res = await fetch('/api');
+        const data = await res.json();
+        
+        // Update footer
+        document.getElementById('footerInfo').textContent = 
+          `Rate Limit: ${data.rate_limit} | Cache TTL: ${data.cache_ttl} | Total Endpoints: ${data.total_endpoints}`;
+        
+        // Display endpoints by category
+        const endpointsList = document.getElementById('endpointsList');
+        endpointsList.classList.remove('loading');
+        
+        let html = '<div class="grid">';
+        for (const [category, endpoints] of Object.entries(data.categories)) {
+          endpoints.forEach(ep => {
+            const methodColor = ep.method === 'GET' ? '#22c55e' : '#3b82f6';
+            html += `
+              <div class="card" onclick="window.location.href='/docs'">
+                <div class="card-title">${ep.name}</div>
+                <div class="card-desc">${ep.description}</div>
+                <span class="badge" style="background: rgba(${ep.method === 'GET' ? '34,197,94' : '59,130,246'},0.2); color: ${methodColor}">
+                  ${ep.method} ${ep.path}
+                </span>
+              </div>
+            `;
+          });
+        }
+        html += '</div>';
+        endpointsList.innerHTML = html;
+        
+      } catch (err) {
+        console.error('Failed to load endpoints:', err);
+        document.getElementById('endpointsList').innerHTML = 
+          '<p style="color: #ef4444;">Failed to load endpoints</p>';
+      }
+    }
+    
+    function formatUptime(seconds) {
+      const days = Math.floor(seconds / 86400);
+      const hours = Math.floor((seconds % 86400) / 3600);
+      const mins = Math.floor((seconds % 3600) / 60);
+      if (days > 0) return days + 'd ' + hours + 'h';
+      if (hours > 0) return hours + 'h ' + mins + 'm';
+      return mins + 'm';
+    }
+    
+    // Load on page load
+    loadStats();
+    loadEndpoints();
+    
+    // Refresh stats every 10 seconds
+    setInterval(loadStats, 10000);
+  </script>
+</body>
+</html>
